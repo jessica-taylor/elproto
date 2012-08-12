@@ -1,7 +1,10 @@
+module Elb.Syntax where
 
 import Data.Set (Set, \\)
 import qualified Data.Set as Set
 import Language.Haskell.TH
+
+import Elb.InvFun
 
 patternDirectVariables :: Pat -> Set Name
 patternDirectVariables (VarP n) = Set.fromList [n]
@@ -92,42 +95,25 @@ translateStatement vars (BindS pat (InfixE (Just fun) (VarE op) (Just arg)))
           commonVars = vars \\ patternVariables argPattern
 
 translateStatement vars (BindS pat expr) = do
-  rhs <- [| $expr -< () |]
+  rhs <- [| $(return expr) -< () |]
   translateStatement vars (BindS pat rhs)
-
-translateStatement vars (NoBindS inf) = do
-  lhs <- [p| () |]
-  translateStatement vars (BindS lhs inf)
+translateStatement vars (NoBindS inf) = 
+  translateStatement vars (BindS (TupP []) inf)
 
 translateStatements :: Set Name -> [Stmt] -> Q Exp
-translateStatements vars [NoBindS ret] =
-  let retPat = exprPattern ret
-      retVars = patternVariables retPat in
-    if vars != retVars then
-      error "Not all variables "
-
-repeat 0 dist = const []
-repeat n dist = [distr|do
-  first <- distr
-  rest <- repeat (n-1) distr
-  first:rest
-|]
-
-repeat' nDistr dist = [distr|do
-  n <- nDistr
-  samples <- repeat n dist
-  n -< const (length samples)
-  samples
-|]
-
-
-myDistr mean meanVar var = [distr|do
-  actualMean <- normal mean meanVar
-  samples <- repeat (geometric 5) (normal actualMean var)
-  posterior mean meanVar var samples -< actualMean
-  samples
-|]
+translateStatements vars [NoBindS ret] 
+  | vars != retVars = error "Not all variables were returned"
+  | otherwise = [| Compose $(scopeMinusPattern vars retPat) 
+                   (Pure (\((), res) -> res) (\res -> ((), res))) |]
+  where retPat = exprPattern ret
+        retVars = patternVariables retPat
+translateStatements vars (stmt:rest) = do
+  (exp, newVars) <- translateStatement vars stmt
+  [| Compose $(return exp) $(translateStatements newVars rest) |]
 
 translateDo :: Exp -> Q Exp
-translateDo (LamE [argPat] (DoE [NoBindS res])) = do
-  translateStatement argVars 
+translateDo (LamE [argPat] (DoE stmts)) =
+  [| Pure (\a -> ((), a)) (\((), a) -> a) `Compose`
+     $(scopePlusPattern Set.empty argPat) `Compose`
+     $(translateStatements (patternVariables argPat) stmts) |]
+translateDo (DoE stmts) = translateDo (LamE (TupP []) (DoE stmts))
