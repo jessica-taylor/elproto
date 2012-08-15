@@ -1,6 +1,6 @@
 module Elb.Syntax (distr) where
 
-import Data.Set (Set, \\)
+import Data.Set (Set, (\\))
 import qualified Data.Set as Set
 import Language.Haskell.Exts.Parser (
   parseExp, ParseResult(ParseOk, ParseFailed))

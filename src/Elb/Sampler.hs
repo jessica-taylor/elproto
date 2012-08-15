@@ -1,11 +1,11 @@
 module Elb.Sampler (
-  Sampler, flip, unflip
+  Sampler, runSampler, flip, unflip
 ) where
 
-import Data.Random (StdGen, random)
+import System.Random (StdGen, random)
 
 
-data Sampler a = Sampler { 
+data Sampler a = Sampler {
   runSampler :: StdGen -> Double -> Either String (a, StdGen, Double) 
 }
 

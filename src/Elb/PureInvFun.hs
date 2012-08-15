@@ -1,6 +1,6 @@
-module PureInvFun (
+module Elb.PureInvFun (
   PureInvFun(PureInvfun), errorless, call, invert
-)where
+) where
 
 data PureInvFun a b = 
   PureInvFun (a -> Either String b) (b -> Either String a)
