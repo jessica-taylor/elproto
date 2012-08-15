@@ -37,4 +37,5 @@ main = do
   let distr = replicateInv 20 (Flip 0.2)
   (flips, lp) <- runSamplerIO (sample distr ())
   print (flips, lp)
+  
 -- TODO(mario) Write more examples.
