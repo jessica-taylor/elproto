@@ -18,3 +18,4 @@ main = do
   (res, lp) <- runSamplerIO (sample (twoFlips 0.5) ())
   print (res, lp)
 
+-- TODO(mario) Write more examples.

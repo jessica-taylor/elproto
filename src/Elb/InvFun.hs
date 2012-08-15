@@ -1,6 +1,6 @@
 {-# LANGUAGE GADTs #-}
 module Elb.InvFun (
-  InvFun(Pure, Compose, Subcall, Undo, Flip),
+  InvFun(Pure, Compose, Subcall, Undo, Flip, RandInt),
   sample
 ) where
 
@@ -16,6 +16,7 @@ data InvFun a b where
   Subcall :: (Eq b, Eq c) => (a -> InvFun b c) -> InvFun (a, b) (a, c)
   Undo :: InvFun a b -> InvFun b a
   Flip :: Double -> InvFun () Bool
+  -- TODO(mario) Make a function to get a random Int
 
 sample :: (Eq a, Eq b) => InvFun a b -> a -> Sampler b
 sample (Pure f) x = case Pure.call f x of
