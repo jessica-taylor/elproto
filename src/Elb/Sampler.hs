@@ -1,14 +1,15 @@
 module Elb.Sampler (
-  Sampler, runSampler, flip, unflip
+  Sampler, runSampler, flipCoin, unflipCoin, runSamplerIO
 ) where
 
-import System.Random (StdGen, random)
+import Control.Monad.Error ()
+import System.Random (StdGen, random, newStdGen)
 
 
 data Sampler a = Sampler {
   runSampler :: StdGen -> Double -> Either String (a, StdGen, Double) 
 }
--- flip 2 coins
+-- flipCoin 2 coins
 -- get result: prob 1/4
 -- could pass probability, but number small
 -- log xy = log x + log y
@@ -27,7 +28,7 @@ instance Monad Sampler where
   -- >>= defines new infix operator
   Sampler run >>= f = Sampler $ \g lp -> do
     -- whole thing is Bool -> Sampler Bool
-    -- line below runs flip 0.5
+    -- line below runs flipCoin 0.5
     (x, g', lp') <- run g lp
     -- anything that has return, bind is monad
     -- g' is new seed, lp' is new lp. lawl tautology
@@ -37,21 +38,27 @@ instance Monad Sampler where
 -- <- do syntax
 -- monads are wizard things, types are your spells
 -- example of new infix (bind) operator:
--- flip 0.5 >>= \f -> if f then flip 0.9 else flip 0.1
+-- flipCoin 0.5 >>= \f -> if f then flip 0.9 else flip 0.1
 -- return a Sampler
 
 -- takes p of coming true, returns sampler (== random generator)
-flip :: Double -> Sampler Bool
+flipCoin :: Double -> Sampler Bool
 -- $ means apply Sampler to \g and lp
-flip prob = Sampler $ \g lp -> 
--- this may be fucked up
-  return (flip, g', lp + log (if flip then prob else 1-prob))
-  -- where is let backwards
-  where (x, g') = random g
-        flip = x < prob)
--- TODO(mario) figure out why this flips a coin, grok the syntax
+flipCoin prob = Sampler $ \g lp -> 
+  let (x, g') = random g
+      heads = x < prob
+    in return (heads, g', lp + log (if heads then prob else 1-prob))
+-- TODO(mario) figure out why this flipCoins a coin, grok the syntax
 
-unflip :: Double -> Bool -> Sampler ()
-unflip prob flip = Sampler $ \g lp -> 
-  return ((), g, lp - log (if flip then prob else 1-prob)))
--- increases log probability (flip 2 coins! back to the future! now 1 coin!)
+unflipCoin :: Double -> Bool -> Sampler ()
+unflipCoin prob heads = Sampler $ \g lp -> 
+  return ((), g, lp - log (if heads then prob else 1-prob))
+-- increases log probability (flipCoin 2 coins! back to the future! now 1 coin!)
+
+runSamplerIO :: Sampler a -> IO (a, Double)
+runSamplerIO samp = do
+  gen <- newStdGen
+  case runSampler samp gen 0 of
+    Left msg -> fail msg
+    Right (res, _, lp) -> return (res, lp)
+

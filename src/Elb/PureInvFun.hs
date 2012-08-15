@@ -8,7 +8,7 @@ data PureInvFun a b =
   -- mario should learn how these error messages work
   -- arguments: g(f(x)) -> f(x) -> x -> error! if x is not really x
 errorless :: (a -> b) -> (b -> a) -> PureInvFun a b
-errorless f invF = Pure (return . f) (return . invF) undefined undefined
+errorless f invF = PureInvFun (return . f) (return . invF) undefined undefined
 
 call :: Eq a => PureInvFun a b -> a -> Either String b
 call (PureInvFun f invF err _) x = do
