@@ -9,6 +9,7 @@ import Elb.InvFun
 import Elb.PureInvFun (errorless)
 
 infixr 0 -<
+(-<) :: InvFun a b -> a -> InvFun () b
 (-<) = error "Use of -< outside distr code"
 
 -- Gets variables in a pattern (but not in sub-patterns).
