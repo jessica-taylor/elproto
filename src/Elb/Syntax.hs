@@ -77,6 +77,8 @@ exprPattern (ConE name) = ConP name []
 exprPattern (AppE fun arg) = case exprPattern fun of
   ConP name [args] -> ConP name ([args] ++ [exprPattern arg])
   _ -> error "Cannot have application other than constructor"
+exprPattern (InfixE (Just lhs) (ConE name) (Just rhs)) =
+  ConP name $ map exprPattern [lhs, rhs]
 exprPattern (RecConE name fields) =
   RecP name [(n, exprPattern e) | (n, e) <- fields]
 exprPattern (ListE exprs) = ListP (map exprPattern exprs)
