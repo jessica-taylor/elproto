@@ -16,6 +16,8 @@ twoFlips prob = $(distr [|do
 
 replicateInv' :: Eq a => Int -> InvFun () a -> InvFun [a] [a]
 replicateInv' 0 samp = Pure (errorless reverse reverse)
+-- TODO(mario) Understand why |\elems comes from [a] better. Lambda calc.
+-- distr is a keyword Jacob created.
 replicateInv' n samp = $(distr [|\elems -> do
   first <- samp
   replicateInv' (n-1) samp -< (first:elems)
@@ -29,6 +31,11 @@ replicateInv n samp = $(distr [|do
 
 main :: IO ()
 main = do
+  (res, lp) <- runSamplerIO (sample (twoFlips 0.5) ())
+  print (res, lp)
+
   let samp = replicateInv 20 (Flip 0.2)
   (flips, lp) <- runSamplerIO (sample samp ())
   print (flips, lp)
+  
+-- TODO(mario) Write more examples.

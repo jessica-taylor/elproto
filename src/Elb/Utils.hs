@@ -2,6 +2,7 @@ module Elb.Utils (constant, idInv) where
 
 import Elb.InvFun
 import Elb.PureInvFun
+import Elb.Syntax
 
 
 idInv :: InvFun a a

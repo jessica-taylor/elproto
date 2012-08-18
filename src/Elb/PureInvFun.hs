@@ -4,6 +4,8 @@ module Elb.PureInvFun (
 
 import Control.Monad.Error ()
 
+-- TODO(mario) Look at replicateInv' invocation and clean up this syntax. Maybe
+-- make a wrapper in Utils.hs
 data PureInvFun a b = 
   PureInvFun (a -> Either String b) (b -> Either String a)
     (a -> b -> a -> String) (b -> a -> b -> String)
