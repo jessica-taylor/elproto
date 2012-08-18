@@ -29,6 +29,6 @@ replicateInv n samp = $(distr [|do
 
 main :: IO ()
 main = do
-  let distr = replicateInv 20 (Flip 0.2)
-  (flips, lp) <- runSamplerIO (sample distr ())
+  let samp = replicateInv 20 (Flip 0.2)
+  (flips, lp) <- runSamplerIO (sample samp ())
   print (flips, lp)
