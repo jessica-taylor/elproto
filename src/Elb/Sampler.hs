@@ -44,14 +44,18 @@ instance Monad Sampler where
 -- takes p of coming true, returns sampler (== random generator)
 flipCoin :: Double -> Sampler Bool
 -- $ means apply Sampler to \g and lp
-flipCoin prob = Sampler $ \g lp -> 
+flipCoin prob 
+  | prob < 0 || prob > 1 = error "prob must be between 0 and 1"
+  | otherwise = Sampler $ \g lp -> 
   let (x, g') = random g
       heads = x < prob
     in return (heads, g', lp + log (if heads then prob else 1-prob))
 -- TODO(mario) figure out why this flipCoins a coin, grok the syntax
 
 unflipCoin :: Double -> Bool -> Sampler ()
-unflipCoin prob heads = Sampler $ \g lp -> 
+unflipCoin prob heads =
+  | prob < 0 || prob > 1 = error "prob must be between 0 and 1"
+  | otherwise = Sampler $ \g lp -> 
   return ((), g, lp - log (if heads then prob else 1-prob))
 -- increases log probability (flipCoin 2 coins! back to the future! now 1 coin!)
 

@@ -1,44 +1,45 @@
-module Elb.Utils (constant, idInv) where
+module Elb.Utils (
+  invPure, invCompose, invSubcall, invUndo, invFlip,
+  applied, invConst, invId, reverseinv
+) where
 
 import Elb.InvFun
-import Elb.PureInvFun
+import Elb.invPureFun
 import Elb.Syntax
 
+invPure :: invPureFun a b -> InvFun a b
+invPure = Pure
 
-idInv :: InvFun a a
-idInv = Pure (errorless id id)
+invCompose :: Eq b => InvFun a b -> InvFun b c -> InvFun a c
+invCompose = Compose
 
-constant :: a -> InvFun () a
-constant x = Pure (errorless (const x) (const ()))
+invSubcall :: (Eq b, Eq c) => (a -> InvFun b c) -> InvFun (a, b) (a, c)
+invSubcall = Subcall
 
-binarySearchInt :: (Int -> Int -> Int -> Double) -> Int -> Int -> InvFun () Int
-binraySearchInt probLess low high
-  | high <= low = error "high must exceed low"
-  | high == low + 1 = constant low
-  | otherwise = $(distr [|do
-    isLess <- probLess low mid high
-    result <- uncurry randInRange (if isLess then (low, mid) else (mid, high))
-    undo (constant (result < mid)) -< isLess
-    return result
-    |]) where mid = low + div (high + 1 - low) 2
+invUndo :: InvFun a b -> InvFun b a
+invUndo = Undo
 
-portion :: Double -> Double -> Double -> Double
-portion low med high = (med - low) / (high - low)
+invFlip :: Double -> InvFun () Bool
+invFlip = Flip
 
-randInRange :: Int -> Int -> InvFun () Int
-randInRange = binarySearchInt getProb
-  where getProb l m h = 
-          portion (fromIntegral l) (fromIntegral m) (fromIntegral h)
+invApplied :: InvFun a b -> a -> InvFun () b
+invApplied f x = invCompose f (invConst x)
 
-fromCdfHelper :: (Double -> Double) -> Int -> Int -> Int -> InvFun () Int
-fromCdfHelper cdf scale = binarySearchInt getProb
-  where getProb l m h = fallback (cdf' m - cdf' l) / (cdf' h - cdf' l)
-                                 portion (fromIntegral l) (fromIntegral m) 
-                                         (fromIntegral h)
-        cdf' x = cdf (fromIntegral x / fromIntegral scale)
-        fallback a b = if 0 <= a <= 1 then a else b
+invId :: InvFun a a
+invId = Pure (errorless id id)
 
-fromCdf :: (Double -> Double) -> Int -> InvFun () Int
-fromCdf cdf scale = fromCdfHelper cdf scale 0 scale
+invConst :: a -> InvFun () a
+invConst x = Pure (errorless (const x) (const ()))
 
+invReverse :: InvFun [a] [a]
+invReverse = Pure $ errorless reverse reverse
 
+invReplicate' :: Eq a => Int -> InvFun () a -> InvFun [a] [a]
+invReplicate' 0 samp = invReverse
+invReplicate' n samp = $(distr [|\elems -> do
+  first <- samp
+  invReplicate' (n-1) samp -< (first:elems)
+  |])
+
+invReplicate :: Eq a => Int -> InvFun () a -> InvFun () [a]
+invReplicate n samp = invApplied (invreplicate' n samp) []
