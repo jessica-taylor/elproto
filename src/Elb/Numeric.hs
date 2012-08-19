@@ -49,4 +49,4 @@ dirichletHelper ((weight, sumRestWeights) : rest) scale = $(distr [|\done -> do
 dirichlet :: [Int] -> Int -> InvFun () [Int]
 dirichlet weights scale = 
   invApplied (dirichletHelper (zip weights restSums) scale) []
-  where restSums = tail $ scanl (flip (-)) (sum weights) weights
+  where restSums = tail $ scanl (-) (sum weights) weights
