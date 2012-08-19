@@ -10,7 +10,7 @@ import Elb.PureInvFun (PureInvFun)
 import qualified Elb.PureInvFun as Pure
 import Elb.Sampler (Sampler, flipCoin, unflipCoin)
 
-data InvFun a b where
+data (Eq a, Eq b) => InvFun a b where
   Pure :: PureInvFun a b -> InvFun a b
   Compose :: Eq b => InvFun a b -> InvFun b c -> InvFun a c
   Subcall :: (Eq b, Eq c) => (a -> InvFun b c) -> InvFun (a, b) (a, c)

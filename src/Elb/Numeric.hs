@@ -1,19 +1,19 @@
-module Elb.Numeric (beta, binarySearchInt, fromCdf, randInRange) where
+:
 
 import Numeric.SpecFunctions (incompleteBeta)
 
 import Elb.InvFun
-import Elb.invPureFun
+import Elb.PureInvFun
 import Elb.Syntax
 
 binarySearchInt :: (Int -> Int -> Int -> Double) -> Int -> Int -> InvFun () Int
 binraySearchInt probLess low high
   | high <= low = error "high must exceed low"
-  | high == low + 1 = invConst low
+  | high == low + 1 = constI low
   | otherwise = $(distr [|do
     isLess <- probLess low mid high
     result <- uncurry randInRange (if isLess then (low, mid) else (mid, high))
-    undo (invConst (result < mid)) -< isLess
+    undo (constI (result < mid)) -< isLess
     return result
     |]) where mid = low + div (high + 1 - low) 2
 
@@ -34,13 +34,13 @@ fromCdfHelper cdf scale = binarySearchInt getProb
         fallback a b = if 0 <= a && a <= 1 then a else b
 
 fromCdf :: (Double -> Double) -> Int -> InvFun () Int
-fromCdf cdf scale = fromCdfHelper cdf scale 0 scale
+fromCdf cdf scale = fromCdfHelper cdf scale 0 (scale+1)
 
 beta :: Int -> Int -> Int -> InvFun () Int
 beta a b = fromCdf (incompleteBeta a b)
 
 dirichletHelper :: [(Int, Int)] -> Int -> InvFun [Int] [Int]
-dirichletHelper [] _ = invReverse
+dirichletHelper [] _ = reverseI
 dirichletHelper ((weight, sumRestWeights) : rest) scale = $(distr [|\done -> do
   first <- beta weight sumRestWeights scale
   dirichletHelper rest (scale - first) (first:done)
@@ -48,5 +48,5 @@ dirichletHelper ((weight, sumRestWeights) : rest) scale = $(distr [|\done -> do
 
 dirichlet :: [Int] -> Int -> InvFun () [Int]
 dirichlet weights scale = 
-  invApplied (dirichletHelper (zip weights restSums) scale) []
+  appliedI (dirichletHelper (zip weights restSums) scale) []
   where restSums = tail $ scanl (-) (sum weights) weights

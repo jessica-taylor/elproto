@@ -1,45 +1,45 @@
 module Elb.Utils (
-  invPure, invCompose, invSubcall, invUndo, invFlip,
-  applied, invConst, invId, reverseinv
+  pureI, composeI, subcallI, undoI, flipI,
+  applied, constI, idI, reverseinv
 ) where
 
 import Elb.InvFun
-import Elb.invPureFun
+import Elb.PureInvFun
 import Elb.Syntax
 
-invPure :: invPureFun a b -> InvFun a b
-invPure = Pure
+pureI :: PureInvFun a b -> InvFun a b
+pureI = Pure
 
-invCompose :: Eq b => InvFun a b -> InvFun b c -> InvFun a c
-invCompose = Compose
+composeI :: Eq b => InvFun a b -> InvFun b c -> InvFun a c
+composeI = Compose
 
-invSubcall :: (Eq b, Eq c) => (a -> InvFun b c) -> InvFun (a, b) (a, c)
-invSubcall = Subcall
+subcallI :: (Eq b, Eq c) => (a -> InvFun b c) -> InvFun (a, b) (a, c)
+subcallI = Subcall
 
-invUndo :: InvFun a b -> InvFun b a
-invUndo = Undo
+undoI :: InvFun a b -> InvFun b a
+undoI = Undo
 
-invFlip :: Double -> InvFun () Bool
-invFlip = Flip
+flipI :: Double -> InvFun () Bool
+flipI = Flip
 
-invApplied :: InvFun a b -> a -> InvFun () b
-invApplied f x = invCompose f (invConst x)
+appliedI :: InvFun a b -> a -> InvFun () b
+appliedI f x = composeI f (constI x)
 
-invId :: InvFun a a
-invId = Pure (errorless id id)
+idI :: InvFun a a
+idI = Pure (errorless id id)
 
-invConst :: a -> InvFun () a
-invConst x = Pure (errorless (const x) (const ()))
+constI :: a -> InvFun () a
+constI x = Pure (errorless (const x) (const ()))
 
-invReverse :: InvFun [a] [a]
-invReverse = Pure $ errorless reverse reverse
+reverseI :: InvFun [a] [a]
+reverseI = Pure $ errorless reverse reverse
 
-invReplicate' :: Eq a => Int -> InvFun () a -> InvFun [a] [a]
-invReplicate' 0 samp = invReverse
-invReplicate' n samp = $(distr [|\elems -> do
+replicateI' :: Eq a => Int -> InvFun () a -> InvFun [a] [a]
+replicateI' 0 samp = reverseI
+replicateI' n samp = $(distr [|\elems -> do
   first <- samp
-  invReplicate' (n-1) samp -< (first:elems)
+  replicateI' (n-1) samp -< (first:elems)
   |])
 
-invReplicate :: Eq a => Int -> InvFun () a -> InvFun () [a]
-invReplicate n samp = invApplied (invreplicate' n samp) []
+replicateI :: Eq a => Int -> InvFun () a -> InvFun () [a]
+replicateI n samp = appliedI (replicateI' n samp) []
