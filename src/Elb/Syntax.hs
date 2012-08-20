@@ -8,6 +8,20 @@ import Language.Haskell.TH
 import Elb.InvFun
 import Elb.PureInvFun (errorless)
 
+{-
+
+TODO(jacobt):
+make this report a helpful error message:
+
+dirichletHelper :: Int -> InvFun [Int] [Int]
+dirichletHelper scale = $(distr [|\elems -> do
+  first <- constI 1
+  dirichletHelper first -< (first:elems)
+  |])
+
+problem: first is not allowed to be used in the last line
+-}
+
 infixr 0 -<
 (-<) :: InvFun a b -> a -> InvFun () b
 (-<) = error "Use of -< outside distr code"
@@ -137,8 +151,8 @@ translateStatements :: Set Name -> [Stmt] -> Q Exp
 translateStatements vars [NoBindS (InfixE (Just fun) (VarE op) (Just arg))]
   | nameBase op == "-<" = [| Compose $(returnPattern vars (exprPattern arg))
                              $(return fun) |]
-translateStatements vars [NoBindS (AppE (VarE return') ret)]
-  | nameBase return' == "return" = returnPattern vars (exprPattern ret)
+translateStatements vars [NoBindS (AppE (VarE returnI') ret)]
+  | nameBase returnI' == "returnI" = returnPattern vars (exprPattern ret)
 translateStatements vars [x] = error ("Bad final statement: " ++ show x)
 translateStatements vars (stmt:rest) = do
   (exp, newVars) <- translateStatement vars stmt

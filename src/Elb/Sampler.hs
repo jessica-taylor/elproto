@@ -53,10 +53,10 @@ flipCoin prob
 -- TODO(mario) figure out why this flipCoins a coin, grok the syntax
 
 unflipCoin :: Double -> Bool -> Sampler ()
-unflipCoin prob heads =
+unflipCoin prob heads
   | prob < 0 || prob > 1 = error "prob must be between 0 and 1"
   | otherwise = Sampler $ \g lp -> 
-  return ((), g, lp - log (if heads then prob else 1-prob))
+    return ((), g, lp - log (if heads then prob else 1-prob))
 -- increases log probability (flipCoin 2 coins! back to the future! now 1 coin!)
 
 runSamplerIO :: Sampler a -> IO (a, Double)

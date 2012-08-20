@@ -1,37 +1,38 @@
+{-# LANGUAGE TemplateHaskell #-}
 module Elb.Utils (
   pureI, composeI, subcallI, undoI, flipI,
-  applied, constI, idI, reverseinv
+  appliedI, returnI, idI, replicateI, reverseI
 ) where
 
 import Elb.InvFun
 import Elb.PureInvFun
 import Elb.Syntax
 
-pureI :: PureInvFun a b -> InvFun a b
+pureI :: (Eq a, Eq b) => PureInvFun a b -> InvFun a b
 pureI = Pure
 
-composeI :: Eq b => InvFun a b -> InvFun b c -> InvFun a c
+composeI :: (Eq a, Eq b, Eq c) => InvFun a b -> InvFun b c -> InvFun a c
 composeI = Compose
 
-subcallI :: (Eq b, Eq c) => (a -> InvFun b c) -> InvFun (a, b) (a, c)
+subcallI :: (Eq a, Eq b, Eq c) => (a -> InvFun b c) -> InvFun (a, b) (a, c)
 subcallI = Subcall
 
-undoI :: InvFun a b -> InvFun b a
+undoI :: (Eq a, Eq b) => InvFun a b -> InvFun b a
 undoI = Undo
 
 flipI :: Double -> InvFun () Bool
 flipI = Flip
 
-appliedI :: InvFun a b -> a -> InvFun () b
-appliedI f x = composeI f (constI x)
-
-idI :: InvFun a a
+idI :: Eq a => InvFun a a
 idI = Pure (errorless id id)
 
-constI :: a -> InvFun () a
-constI x = Pure (errorless (const x) (const ()))
+returnI :: Eq a => a -> InvFun () a
+returnI x = Pure (errorless (const x) (const ()))
 
-reverseI :: InvFun [a] [a]
+appliedI :: (Eq a, Eq b) => InvFun a b -> a -> InvFun () b
+appliedI f x = composeI (returnI x) f
+
+reverseI :: Eq a => InvFun [a] [a]
 reverseI = Pure $ errorless reverse reverse
 
 replicateI' :: Eq a => Int -> InvFun () a -> InvFun [a] [a]
