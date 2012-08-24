@@ -16,10 +16,18 @@ twoFlips prob = $(distr [|do
   |])
 
 
+dirichletSamples :: [Int] -> Int -> Int -> InvFun () Int
+
+dirichletSamples weights scale nsamps = $(distr [|do
+  alphas <- dirichlet weights scale
+  samples <- replicateI nsamps (
+
+
 main :: IO ()
 main = do
   let samp = replicateI 20 (dirichlet [1,2,3] 1000)
   (res, lp) <- runSamplerIO (sample samp ())
-  print (res, lp)
+  ((), lp') <- runSamplerIO (sample (undoI samp) res)
+  print (res, lp, lp')
   
 -- TODO(mario) Write more examples.
