@@ -17,7 +17,6 @@ data InvFun a b where
   Subcall :: (Eq a, Eq b, Eq c) => (a -> InvFun b c) -> InvFun (a, b) (a, c)
   Undo :: (Eq a, Eq b) => InvFun a b -> InvFun b a
   Flip :: Double -> InvFun () Bool
-  --Importance :: InvFun () (a, b) -> ([b -> InvFun () a], Double) -> b -> InvFun () a
 
 
 sample :: (Eq a, Eq b, RandomGen g) => InvFun a b -> a -> Sampler g b
@@ -30,12 +29,6 @@ sample (Subcall f) (a, b) = do
   return (a, c)
 sample (Undo f) x = unsample f x
 sample (Flip prob) () = flipCoin prob
--- sample (Importance prob joint posts obs) () = do
---   hypLps <- mapM (\(post, _) -> subSample (sample (post obs) ())) posts
---   ((hyp, hypLp), postLp) <- selectByLp $ zip (zip hypLps (map snd posts))
---                                     (map snd hypLps)
---   addLp (hypLp - log (postLp / sum (map snd posts))))
---   return hyp
 
 
 unsample :: (Eq a, Eq b, RandomGen g) => InvFun a b -> b -> Sampler g a

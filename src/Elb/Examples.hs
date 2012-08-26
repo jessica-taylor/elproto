@@ -28,7 +28,7 @@ truePosterior samples =
 
 badPosterior :: [Int] -> InvFun () [Int]
 badPosterior = const prior
-  
+
 
 main :: IO ()
 main = do
