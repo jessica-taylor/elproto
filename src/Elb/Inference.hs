@@ -5,18 +5,14 @@ import Elb.LogProb (LogProb)
 import Elb.Sampler (runSamplerRand)
 import Elb.Utils (undoI)
 
+
 scoredHypothesis :: (RandomGen g) => InvFun () a -> (a -> InvFun () b) 
-                 -> (b -> InvFun () a) -> b -> Rand (a, LogProb)
+                 -> (b -> InvFun () a) -> b -> Sampler g a
 scoredHypothesis prior obsFun posterior obs = do
-  -- P(H|O)
-  (hyp, posteriorProb) <- runSamplerRand $ sample (posterior obs) ()
-  -- 1 / P(O|H)
-  ((), invObsProb) <- runSamplerRand $ sample (undoI (obsFun hyp)) obs
-  -- 1 / P(H)
-  ((), invPriorProb) <- runSamplerRand $ sample (undoI prior) hyp
-  -- P(O) = P(H) P(O|H) / P(H|O)
-  -- better P(O) means better posterior
-  return (hyp, 1 / (invPriorProb * invObsProb * posteriorProb))
+    hyp <- sample (posterior obs) ()
+    sample (undoI (obsFun hyp)) obs
+    sample (undoI prior) hyp
+    return hyp
 
 scoredPosterior :: (RandomGen g) => InvFun () a -> (a -> InvFun () b)
                 -> (b -> InvFun () a) -> Rand LogProb

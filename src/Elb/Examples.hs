@@ -8,20 +8,25 @@ import Elb.Sampler
 import Elb.Syntax
 import Elb.Utils
 
-twoFlips :: Double -> InvFun () (Bool, Bool)
-twoFlips prob = $(distr [|do
-  flip1 <- Flip prob
-  flip2 <- Flip prob
-  returnI (flip1, flip2)
-  |])
+priorWeights :: [Int]
+priorWeights = [1, 2, 3]
 
+numSamples :: Int
+numSamples = 20
 
-dirichletSamples :: [Int] -> Int -> Int -> InvFun () Int
+prior :: InvFun () [Int]
+prior = dirichlet priorweights 1000
 
-dirichletSamples weights scale nsamps = $(distr [|do
-  alphas <- dirichlet weights scale
-  samples <- replicateI nsamps (
+obsFun :: [Int] -> InvFun () [Int]
+obsFun weights = replicateI numSamples (categorical weights)
 
+truePosterior :: [Int] -> InvFun () [Int]
+truePosterior samples = 
+  zipWith (+) priorWeights (map (\n -> length (filter (==n) samples)) [0..])
+
+badPosterior :: [Int] -> InvFun () [Int]
+badPosterior = const prior
+  
 
 main :: IO ()
 main = do
