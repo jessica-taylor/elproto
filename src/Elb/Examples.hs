@@ -1,7 +1,9 @@
 {-# LANGUAGE TemplateHaskell #-}
+-- |'Examples' has examples for elproto.
 module Examples where
 
 import Elb.InvFun
+import Elb.LogProb
 import Elb.Numeric
 import Elb.PureInvFun
 import Elb.Sampler
@@ -35,4 +37,4 @@ main = do
   ((), lp') <- runSamplerIO (sample (undoI samp) res)
   print (res, lp, lp')
   
--- TODO(mario) Write more examples.
+-- TODO(mario) Write more (LogProb) examples.
