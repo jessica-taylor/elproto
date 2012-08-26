@@ -11,6 +11,6 @@ scoredHypothesis prior obsFun posterior obs = do
   ((), priorProb) <- sample (undoI prior) hyp
   -- P(O) = P(H) P(O|H) / P(H|O)
   -- better P(O) means better posterior
-  return (hyp, obsProb * priorProb / posteriorProb)
+  return (hyp, priorProb * obsProb / posteriorProb)
 
 

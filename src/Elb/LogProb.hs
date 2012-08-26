@@ -1,9 +1,18 @@
-module Elb.LogProb (LogProb, toLogProb, fromLogProb) where
+module Elb.LogProb (
+  LogProb, toLogProb, fromLogProb, 
+  logToLogProb, logFromLogProb
+) where
 
-newtype LogProb = LogProb { fromLogProb :: Double } deriving (Eq, Ord, Show)
+newtype LogProb = LogProb { logFromLogProb :: Double } deriving (Eq, Ord, Show)
+
+logToLogProb :: Double -> LogProb
+logToLogProb = LogProb
 
 toLogProb :: Double -> LogProb
-toLogProb = LogProb
+toLogProb = logToLogProb . log
+
+fromLogProb :: LogProb -> Double
+fromLogProb = exp . logFromLogProb
 
 instance Num LogProb where
   LogProb a + LogProb b 
