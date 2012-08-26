@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Elb.Utils (
   pureI, composeI, subcallI, undoI, flipI,
-  appliedI, returnI, idI, replicateI, reverseI, categorical
+  appliedI, returnI, idI, replicateI, reverseI
 ) where
 
 import Elb.InvFun
@@ -45,28 +45,3 @@ replicateI' n samp = $(distr [|\elems -> do
 replicateI :: Eq a => Int -> InvFun () a -> InvFun () [a]
 replicateI n samp = appliedI (replicateI' n samp) []
 
-data CatTree = Leaf Int | Branch Int Double CatTree CatTree
-
-split :: [a] -> ([a], [a])
-split lst = let mid = div (length lst) 2 in (take mid lst, drop mid lst)
-
-makeCatTree :: Int -> [Double] -> CatTree
-makeCatTree start [_] = Leaf start
-makeCatTree start lst =
-  Branch mid (weight left / weight lst) (makeCatTree startleft) 
-             (makeCatTree mid right)
-  where (left, right) = split lst
-        mid = start + length left
-        weight lst = sum (map snd lst)
-
-sampleCatTree :: CatTree -> InvFun () Int
-sampleCatTree (Leaf x) = returnI x
-sampleCatTree (Branch mid p left right) = $(distr [|do
-  isLeft <- flipI p
-  res <- sampleCatTree (if isLeft then left else right)
-  undoI (returnI (res < mid)) -< isLeft
-  returnI res
-
-
-categorical :: [Int] -> InvFun () Int
-categorical weights = sampleCatTree (makeCatTree 0 weights)

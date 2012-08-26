@@ -35,7 +35,7 @@ flipCoin prob
 unflipCoin :: Double -> Bool -> Sampler ()
 unflipCoin prob heads
   | prob < 0 || prob > 1 = error "prob must be between 0 and 1"
-  | otherwise = Sampler $ \prob -> 
+  | otherwise = Sampler $ \prob ->
     return (Right ((), prob / toLogProb (if heads then prob else 1-prob)))
 
 runSamplerRand :: Sampler g a -> Rand g (Either String (a, LogProb))

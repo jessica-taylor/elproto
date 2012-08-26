@@ -1,5 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Elb.Numeric where
+module Elb.Numeric (
+  binarySearchInt, randInRange, fromCdf, beta, dirichlet, categorical
+) where
 
 import Numeric.SpecFunctions (incompleteBeta)
 
@@ -53,3 +55,29 @@ dirichletHelper ((weight, sumRestWeights) : restWeights) scale = $(distr [|do
 dirichlet :: [Double] -> Int -> InvFun () [Int]
 dirichlet weights scale = dirichletHelper (zip weights restSums) scale
   where restSums = tail $ scanl (-) (sum weights) weights
+
+data CatTree = Leaf Int | Branch Int Double CatTree CatTree
+
+split :: [a] -> ([a], [a])
+split lst = let mid = div (length lst) 2 in (take mid lst, drop mid lst)
+
+makeCatTree :: Int -> [Double] -> CatTree
+makeCatTree start [_] = Leaf start
+makeCatTree start lst =
+  Branch mid (weight left / weight lst) (makeCatTree startleft) 
+             (makeCatTree mid right)
+  where (left, right) = split lst
+        mid = start + length left
+        weight lst = sum (map snd lst)
+
+sampleCatTree :: CatTree -> InvFun () Int
+sampleCatTree (Leaf x) = returnI x
+sampleCatTree (Branch mid p left right) = $(distr [|do
+  isLeft <- flipI p
+  res <- sampleCatTree (if isLeft then left else right)
+  undoI (returnI (res < mid)) -< isLeft
+  returnI res
+
+
+categorical :: [Int] -> InvFun () Int
+categorical weights = sampleCatTree (makeCatTree 0 weights)
