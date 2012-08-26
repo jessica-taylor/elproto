@@ -1,68 +1,50 @@
 module Elb.Sampler (
-  Sampler, runSampler, flipCoin, unflipCoin, runSamplerIO
+  Sampler, flipCoin, unflipCoin, 
+  runSamplerRand, runSamplerIO
 ) where
 
 import Control.Monad.Error ()
-import System.Random (StdGen, random, newStdGen)
+import Control.Monad.Random (Rand, evalRandIO, getRandom)
+import System.Random (RandomGen)
+
+import Elb.LogProb (LogProb, toLogProb)
 
 
-data Sampler a = Sampler {
-  runSampler :: StdGen -> Double -> Either String (a, StdGen, Double) 
+newtype Sampler g a = Sampler {
+  runSampler :: LogProb -> Rand g (Either String (a, LogProb))
 }
--- flipCoin 2 coins
--- get result: prob 1/4
--- could pass probability, but number small
--- log xy = log x + log y
--- mario did log probability in 109 ^^
--- wtf did they call it?
--- you can store the log of a small number in a double, but storing a really
--- fucking small double is bad. FLOATING POINT AHHAHH
 
--- definition of how this is a monad
--- Monad is a typeclass. This is a typeclass definition. Defines instance of
--- typeclass Monad which someone already defined.
-instance Monad Sampler where
-  -- constant sampler, always ret x
-  -- Right is Correct
-  return x = Sampler (\g lp -> Right (x, g, lp))
-  -- >>= defines new infix operator
-  Sampler run >>= f = Sampler $ \g lp -> do
-    -- whole thing is Bool -> Sampler Bool
-    -- line below runs flipCoin 0.5
-    (x, g', lp') <- run g lp
-    -- anything that has return, bind is monad
-    -- g' is new seed, lp' is new lp. lawl tautology
-    runSampler (f x) g' lp'
-  -- Left is wrong. Fucking ideological Haskellers.
-  fail msg = Sampler (\g lp -> (Left msg))
--- <- do syntax
--- monads are wizard things, types are your spells
--- example of new infix (bind) operator:
--- flipCoin 0.5 >>= \f -> if f then flip 0.9 else flip 0.1
--- return a Sampler
 
--- takes p of coming true, returns sampler (== random generator)
-flipCoin :: Double -> Sampler Bool
--- $ means apply Sampler to \g and lp
+instance Monad (Sampler g) where
+  return x = Sampler (\prob -> return (x, prob))
+  Sampler run >>= f = Sampler $ \prob -> do
+    first <- run prob
+    case first of
+      Left msg -> return (Left msg)
+      Right (res, prob') -> runSampler (f res) prob'
+  fail msg = Sampler (\prob -> return (Left msg))
+
+flipCoin :: RandomGen g => Double -> Sampler g Bool
 flipCoin prob 
   | prob < 0 || prob > 1 = error "prob must be between 0 and 1"
-  | otherwise = Sampler $ \g lp -> 
-  let (x, g') = random g
-      heads = x < prob
-    in return (heads, g', lp + log (if heads then prob else 1-prob))
--- TODO(mario) figure out why this flipCoins a coin, grok the syntax
+  | otherwise = Sampler $ \prob -> do
+    x <- getRandom
+    let heads = x < prob
+    return (Right (heads, prob * toLogProb (if heads then prob else 1-prob)))
 
 unflipCoin :: Double -> Bool -> Sampler ()
 unflipCoin prob heads
   | prob < 0 || prob > 1 = error "prob must be between 0 and 1"
-  | otherwise = Sampler $ \g lp -> 
-    return ((), g, lp - log (if heads then prob else 1-prob))
--- increases log probability (flipCoin 2 coins! back to the future! now 1 coin!)
+  | otherwise = Sampler $ \prob -> 
+    return (Right ((), prob / toLogProb (if heads then prob else 1-prob)))
 
-runSamplerIO :: Sampler a -> IO (a, Double)
+runSamplerRand :: Sampler g a -> Rand g (Either String (a, LogProb))
+runSamplerRand (Sampler f) = f 0
+
+runSamplerIO :: Sampler StdGen a -> IO (a, LogProb)
 runSamplerIO samp = do
-  gen <- newStdGen
-  case runSampler samp gen 0 of
+  run <- evalRandIO (runSamplerRand samp)
+  case run of
     Left msg -> fail msg
-    Right (res, _, lp) -> return (res, lp)
+    Right (res, prob) -> return (res, prob)
 

@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Elb.Utils (
   pureI, composeI, subcallI, undoI, flipI,
-  appliedI, returnI, idI, replicateI, reverseI
+  appliedI, returnI, idI, replicateI, reverseI, categorical
 ) where
 
 import Elb.InvFun
