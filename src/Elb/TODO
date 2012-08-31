@@ -1,8 +1,9 @@
 Mario
-1. remove annoying comments from code (move to separate branch)
-2. implement RandInt in non-master branch
-3. start documenting Jacob's code
-4. reread large TODO example in annoying branch
+0. read solomonoff
+1. document all jacob's code, understand everything
+- things to know better: machine learning and (writing) models, haskell
+  (monads), template haskell
+2. reread large TODO example in annoying branch
 
 Jacob
 1. Implement Dirichlet, language models
