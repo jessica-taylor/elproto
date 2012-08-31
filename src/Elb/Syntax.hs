@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+-- TODO(mario) leave annoying template haskell learning things here
 module Elb.Syntax (distr, (-<)) where
 
 import Data.Set (Set, (\\))
