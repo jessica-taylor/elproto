@@ -17,7 +17,7 @@ numSamples :: Int
 numSamples = 20
 
 prior :: InvFun () [Int]
-prior = dirichlet priorweights 1000
+prior = dirichlet priorWeights 1000
 
 obsFun :: [Int] -> InvFun () [Int]
 obsFun weights = replicateI numSamples (categorical weights)
