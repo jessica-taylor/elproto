@@ -2,6 +2,7 @@
 -- |'Examples' has examples for elproto.
 module Examples where
 
+import Elb.Inference
 import Elb.InvFun
 import Elb.LogProb
 import Elb.Numeric
@@ -29,12 +30,10 @@ truePosterior samples =
 badPosterior :: [Int] -> InvFun () [Int]
 badPosterior = const prior
 
-
 main :: IO ()
 main = do
-  let samp = replicateI 20 (dirichlet [1,2,3] 1000)
-  (res, lp) <- runSamplerIO (sample samp ())
-  ((), lp') <- runSamplerIO (sample (undoI samp) res)
-  print (res, lp, lp')
+  print $ replicateM 20 (runSamplerIO (scoredHypothesis prior obsFun truePosterior)) 
+  print $ replicateM 20 (runSamplerIO (scoredHypothesis prior obsFun badPosterior)) 
+  
   
 -- TODO(mario) Write more (LogProb) examples.
