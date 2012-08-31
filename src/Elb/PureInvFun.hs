@@ -10,6 +10,9 @@ data PureInvFun a b =
   PureInvFun (a -> Either String b) (b -> Either String a)
     (a -> b -> a -> String) (b -> a -> b -> String)
 
+-- | 'errorless' takes a function and its inverse and returns a pure invertible
+-- function that doesn't throw error messages if invertibility isn't
+-- consistent.
 errorless :: (a -> b) -> (b -> a) -> PureInvFun a b
 errorless f invF = PureInvFun (return . f) (return . invF) undefined undefined
 
