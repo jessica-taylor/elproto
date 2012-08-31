@@ -33,8 +33,16 @@ truePosterior samples = dirichlet weights 1000
 badPosterior :: [Int] -> InvFun () [Int]
 badPosterior = const prior
 
+printSamples :: (Eq a, Show a) => InvFun () a -> IO ()
+printSamples dist = do
+  let samp = runSamplerIO $ sample dist ()
+      printValues lst = print (map (\(v,p) -> (v, logFromLogProb p)) lst)
+  replicateM 20 samp >>= printValues
+
+
 main :: IO ()
 main = do
+  printSamples prior
   let score post = runSamplerIO (scoredPosterior prior obsFun post)
       printScores lst = print (map (logFromLogProb . snd) lst)
   replicateM 20 (score truePosterior) >>= printScores

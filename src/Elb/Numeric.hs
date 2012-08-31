@@ -16,7 +16,8 @@ binarySearchInt probLess low high
   | high == low + 1 = returnI low
   | otherwise = $(distr [|do
     isLess <- flipI (probLess low mid high)
-    result <- uncurry randInRange (if isLess then (low, mid) else (mid, high))
+    result <- uncurry (binarySearchInt probLess) $
+      if isLess then (low, mid) else (mid, high)
     undoI (returnI (result < mid)) -< isLess
     returnI result
     |]) where mid = low + div (high + 1 - low) 2
@@ -26,19 +27,18 @@ portion low med high = (med - low) / (high - low)
 
 randInRange :: Int -> Int -> InvFun () Int
 randInRange = binarySearchInt getProb
-  where getProb l m h = 
+  where getProb l m h =
           portion (fromIntegral l) (fromIntegral m) (fromIntegral h)
 
-fromCdfHelper :: (Double -> Double) -> Int -> Int -> Int -> InvFun () Int
-fromCdfHelper cdf scale = binarySearchInt getProb
-  where getProb l m h = fallback ((cdf' m - cdf' l) / (cdf' h - cdf' l)) $
-                                 portion (fromIntegral l) (fromIntegral m) 
-                                         (fromIntegral h)
-        cdf' x = cdf (fromIntegral x / fromIntegral scale)
+fromCdfHelper :: (Double -> Double) -> Int -> Int -> Int -> Int -> Double
+fromCdfHelper cdf scale l m h = 
+  fallback (portion (cdf' l) (cdf' m) (cdf' h)) $
+    portion (fromIntegral l) (fromIntegral m) (fromIntegral h)
+  where cdf' x = cdf (fromIntegral x / fromIntegral scale)
         fallback a b = if 0 <= a && a <= 1 then a else b
 
 fromCdf :: (Double -> Double) -> Int -> InvFun () Int
-fromCdf cdf scale = fromCdfHelper cdf scale 0 scale
+fromCdf cdf scale = binarySearchInt (fromCdfHelper cdf scale) 0 scale
 
 beta :: Double -> Double -> Int -> InvFun () Int
 beta a b = fromCdf (incompleteBeta a b)
