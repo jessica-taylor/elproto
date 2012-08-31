@@ -26,6 +26,7 @@ flipI = Flip
 idI :: Eq a => InvFun a a
 idI = Pure (errorless id id)
 
+-- | 'returnI' takes an x and returns an InvFun from () to that x.
 returnI :: Eq a => a -> InvFun () a
 returnI x = Pure (errorless (const x) (const ()))
 

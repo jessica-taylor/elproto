@@ -2,34 +2,11 @@ Mario
 1. remove annoying comments from code (move to separate branch)
 2. implement RandInt in non-master branch
 3. start documenting Jacob's code
-4. reread this example of reversing replicateInv'. read Undo.
-
-elems
-elems = [True]
-Undo (replicateInv' 2 (Flip 0.2)) -< [True, False, False]
-will give me back [True]
-replicateInv' (n-1) samp -< (first:elems)
-so we know this produces [True, False, False]
-then we look at replicateInv' 1 samp
-originally 2
-we know that replicateInv' 1 samp produced [True, False, False]
-apply same logic
-we know that replicateInv' 0 samp produced [True, False, False]
-now we know that teh argument to replicateInv' 0 samp was [False, False, True]
-replicateInv' 0 samp reverses its argument
-we know that the reversal of the input to (replicateInv' 0 samp) = [True,
-False, False]
-reverse is a reversible function!
-we know the argument to replicateInv' 0 samp was [False, False, True]
-replicateInv' (n-1) samp -< (first:elems)
-the argument was first:elems
-now weknow
-first = False
-elems = [False, True]
+4. reread large TODO example in annoying branch
 
 Jacob
 1. Implement Dirichlet, language models
 
 System
 Jacob writes shit tons of code, Mario documents so he understands until both
-are similarly productive (or Mario is at least really fucking productive)
+are similarly productive (or Mario is at least really fucking productive).

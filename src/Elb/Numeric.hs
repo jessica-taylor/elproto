@@ -52,9 +52,23 @@ dirichletHelper ((weight, sumRestWeights) : restWeights) scale = $(distr [|do
   returnI (first:rest)
   |])
 
+-- |'dirichlet' returns a sample from the Dirichlet distribution represented as
+-- a list of integers corresponding to a coordinate vector in the category
+-- space. 
+
+-- It takes '[Double]' that weight the categories of the distribution (each
+-- category having its own index) and a scale 'Int' to which  the list of Ints 
+-- in the return value will sum.
 dirichlet :: [Double] -> Int -> InvFun () [Int]
 dirichlet weights scale = dirichletHelper (zip weights restSums) scale
   where restSums = tail $ scanl (-) (sum weights) weights
+  -- TODO(mario) Generalize -- make a version that
+  -- doesn't force user to have return xs sum to scale.
+  -- TODO(mario) Should dirichlet take Int for the weights rather than double?
+  -- I think I was always taught that Beta distribution has counts for the
+  -- alphas/weights.
+  -- TODO(mario) Make this more general. Thes typese are not natural or
+  -- required here.
 
 data CatTree = Leaf Int | Branch Int Double CatTree CatTree
 
