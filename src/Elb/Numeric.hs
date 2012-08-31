@@ -37,6 +37,8 @@ fromCdfHelper cdf scale l m h =
   where cdf' x = cdf (fromIntegral x / fromIntegral scale)
         fallback a b = if 0 <= a && a <= 1 then a else b
 
+-- |'fromCdf' returns a sample from an arbitrary cumulative distribution
+-- functioni as an Int.
 fromCdf :: (Double -> Double) -> Int -> InvFun () Int
 fromCdf cdf scale = binarySearchInt (fromCdfHelper cdf scale) 0 scale
 
@@ -55,7 +57,6 @@ dirichletHelper ((weight, sumRestWeights) : restWeights) scale = $(distr [|do
 -- |'dirichlet' returns a sample from the Dirichlet distribution represented as
 -- a list of integers corresponding to a coordinate vector in the category
 -- space. 
-
 -- It takes '[Double]' that weight the categories of the distribution (each
 -- category having its own index) and a scale 'Int' to which  the list of Ints 
 -- in the return value will sum.
