@@ -23,6 +23,9 @@ dirichletHelper scale = $(distr [|\elems -> do
 problem: first is not allowed to be used in the last line
 -}
 
+-- TODO(mario) Figure out if this is normal tempate Haskell.
+-- TODO(mario) Document the smash operator.
+-- |'-<' is the smash operator.
 infixr 0 -<
 (-<) :: InvFun a b -> a -> InvFun () b
 (-<) = error "Use of -< outside distr code"

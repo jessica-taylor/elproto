@@ -12,6 +12,8 @@ import Elb.Sampler (Sampler, flipCoin, unflipCoin)
 import System.Random (RandomGen)
 
 data InvFun a b where
+  -- TODO(mario) Interrogate Jacob on the semantics of Pure. Shouldn't Pure
+  -- make a PureInvFun, not get rid of it?
   Pure :: (Eq a, Eq b) => PureInvFun a b -> InvFun a b
   Compose :: (Eq a, Eq b, Eq c) => InvFun a b -> InvFun b c -> InvFun a c
   Subcall :: (Eq a, Eq b, Eq c) => (a -> InvFun b c) -> InvFun (a, b) (a, c)
