@@ -78,6 +78,5 @@ sampleCatTree (Branch mid p left right) = $(distr [|do
   undoI (returnI (res < mid)) -< isLeft
   returnI res
 
-
 categorical :: [Int] -> InvFun () Int
 categorical weights = sampleCatTree (makeCatTree 0 weights)
