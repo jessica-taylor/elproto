@@ -10,10 +10,12 @@ import Elb.PureInvFun
 import Elb.Syntax
 import Elb.Utils (appliedI, returnI, flipI, reverseI, undoI)
 
+-- TODO(mario) doc high is exclusive here
 binarySearchInt :: (Int -> Int -> Int -> Double) -> Int -> Int -> InvFun () Int
 binarySearchInt probLess low high
   | high <= low = error "high must exceed low"
   | high == low + 1 = returnI low
+  -- weird template haskell stuff
   | otherwise = $(distr [|do
     isLess <- flipI (probLess low mid high)
     result <- uncurry (binarySearchInt probLess) $
@@ -39,6 +41,7 @@ fromCdfHelper cdf scale l m h =
 
 -- |'fromCdf' returns a sample from an arbitrary cumulative distribution
 -- functioni as an Int.
+-- TODOTODAY read fromCdf, make better understood example of this
 fromCdf :: (Double -> Double) -> Int -> InvFun () Int
 fromCdf cdf scale = binarySearchInt (fromCdfHelper cdf scale) 0 scale
 
