@@ -64,11 +64,10 @@ split lst = let mid = div (length lst) 2 in (take mid lst, drop mid lst)
 makeCatTree :: Int -> [Double] -> CatTree
 makeCatTree start [_] = Leaf start
 makeCatTree start lst =
-  Branch mid (weight left / weight lst) (makeCatTree startleft) 
+  Branch mid (sum left / sum lst) (makeCatTree start left) 
              (makeCatTree mid right)
   where (left, right) = split lst
         mid = start + length left
-        weight lst = sum (map snd lst)
 
 sampleCatTree :: CatTree -> InvFun () Int
 sampleCatTree (Leaf x) = returnI x
@@ -77,6 +76,7 @@ sampleCatTree (Branch mid p left right) = $(distr [|do
   res <- sampleCatTree (if isLeft then left else right)
   undoI (returnI (res < mid)) -< isLeft
   returnI res
+  |])
 
-categorical :: [Int] -> InvFun () Int
+categorical :: [Double] -> InvFun () Int
 categorical weights = sampleCatTree (makeCatTree 0 weights)

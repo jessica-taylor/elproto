@@ -32,6 +32,7 @@ instance Num LogProb where
     | a >= b = LogProb (a + log (1 - exp (b - a)))
     | otherwise = error "Result of LogProb subtraction is negative"
   LogProb a * LogProb b = LogProb (a + b)
+  fromInteger = toLogProb . fromInteger
   -- TODO(mario) Put in more fns from Num. Make sure this works as users would
   -- expect it to work.
   -- TODO(mario) Minimize runtime errors since people may expect behavior of
@@ -40,5 +41,5 @@ instance Num LogProb where
 
 -- |'Fractional LogProb' defines more basic arithmetic operations (division)
 -- for working with log probabilities.
-instance Fractoinal LogProb where
+instance Fractional LogProb where
   LogProb a / LogProb b = LogProb (a - b)

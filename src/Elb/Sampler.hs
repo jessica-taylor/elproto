@@ -5,7 +5,8 @@ module Elb.Sampler (
 
 import Control.Monad.Error (ErrorT, runErrorT)
 import Control.Monad.Random (Rand, evalRandIO, getRandom)
-import System.Random (RandomGen)
+import Control.Monad.Trans (lift)
+import System.Random (RandomGen, StdGen)
 
 import Elb.LogProb (LogProb, toLogProb)
 
@@ -25,16 +26,16 @@ instance Monad (Sampler g) where
 flipCoin :: RandomGen g => Double -> Sampler g Bool
 flipCoin prob 
   | prob < 0 || prob > 1 = error "prob must be between 0 and 1"
-  | otherwise = Sampler $ \prob -> do
+  | otherwise = Sampler $ \pr -> do
     x <- lift getRandom
     let heads = x < prob
-    return (heads, prob * toLogProb (if heads then prob else 1-prob))
+    return (heads, pr * toLogProb (if heads then prob else 1-prob))
 
-unflipCoin :: Double -> Bool -> Sampler ()
+unflipCoin :: Double -> Bool -> Sampler g ()
 unflipCoin prob heads
   | prob < 0 || prob > 1 = error "prob must be between 0 and 1"
-  | otherwise = Sampler $ \prob ->
-    return ((), prob / toLogProb (if heads then prob else 1-prob))
+  | otherwise = Sampler $ \pr ->
+    return ((), pr / toLogProb (if heads then prob else 1-prob))
 
 runSamplerRand :: Sampler g a -> ErrorT String (Rand g) (a, LogProb)
 runSamplerRand (Sampler f) = f 1
