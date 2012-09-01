@@ -42,6 +42,8 @@ fromCdfHelper cdf scale l m h =
 fromCdf :: (Double -> Double) -> Int -> InvFun () Int
 fromCdf cdf scale = binarySearchInt (fromCdfHelper cdf scale) 0 scale
 
+-- |'beta' takes two Doubles as distribution parameters and returns a sample
+-- from the beta distribution. It uses a helper function internally.
 beta :: Double -> Double -> Int -> InvFun () Int
 beta a b = fromCdf (incompleteBeta a b)
 
