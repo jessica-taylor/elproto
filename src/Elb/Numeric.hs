@@ -25,6 +25,9 @@ binarySearchInt probLess low high
 portion :: Double -> Double -> Double -> Double
 portion low med high = (med - low) / (high - low)
 
+-- |'randInRange' takes a lower bound and an upper bound and returns a
+-- random InvFun () Int from that range.
+-- TODO(mario) figure out if bounds are inclusive or not
 randInRange :: Int -> Int -> InvFun () Int
 randInRange = binarySearchInt getProb
   where getProb l m h =
