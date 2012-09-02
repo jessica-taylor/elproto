@@ -98,5 +98,8 @@ sampleCatTree (Branch mid p left right) = $(distr [|do
   returnI res
   |])
 
+-- |'categorical' takes a '[Double]' representing a list of probabilities of
+-- events. It returns an InvFun () Int representing a sample from the
+-- distribution.
 categorical :: [Double] -> InvFun () Int
 categorical weights = sampleCatTree (makeCatTree 0 weights)
