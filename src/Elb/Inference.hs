@@ -18,6 +18,9 @@ scoredHypothesis prior obsFun posterior obs = do
     sample (undoI prior) hyp
     return hyp
 
+-- TODO(mario) Look over notes from Jacob while documenting this. This is an
+-- example very illustrative of the utility of reversible programming in
+-- Bayesian probability.
 scoredPosterior :: (RandomGen g, Eq a, Eq b) => InvFun () a 
                 -> (a -> InvFun () b) -> (b -> InvFun () a) -> Sampler g ()
 scoredPosterior prior obsFun posterior = do

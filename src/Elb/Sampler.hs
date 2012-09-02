@@ -10,7 +10,9 @@ import System.Random (RandomGen, StdGen)
 
 import Elb.LogProb (LogProb, toLogProb)
 
-
+-- |'Sampler' encapsulates a (random) generator and the type of the sample
+-- desired from the distribution. For an example, see flipCoin, which randomly
+-- generates a Bool.
 newtype Sampler g a = Sampler {
   runSampler :: LogProb -> ErrorT String (Rand g) (a, LogProb)
 }
