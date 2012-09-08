@@ -41,6 +41,15 @@ printSamples dist = do
   replicateM 20 samp >>= printValues
 
 
+bagSample :: [Double] -> IO ([Int], LogProb)
+bagSample probs = runSamplerIO $ sample (bagOfWordsObsFun getWord) ()
+  where getWord = categorical probs `composeI` natToWord
+
+bagUnsample :: [Double] -> [Int] -> IO ((), LogProb)
+bagUnsample probs words = 
+  runSamplerIO $ sample (undoI (bagOfWordsObsFun getWord)) words
+  where getWord = categorical probs `composeI` natToWord
+
 main :: IO ()
 main = do
   printSamples prior
