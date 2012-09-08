@@ -6,6 +6,7 @@ import Control.Monad (liftM, replicateM)
 
 import Elb.Inference
 import Elb.InvFun
+import Elb.Language
 import Elb.LogProb
 import Elb.Numeric
 import Elb.PureInvFun

@@ -8,6 +8,12 @@ import Elb.Sampler (Sampler, runSamplerRand)
 import Elb.Utils (undoI)
 
 
+-- data SolvedSupervised param arg value = SolvedSupervised {
+--   paramPrior :: InvFun () param,
+--   obsFun :: param -> arg -> InvFun () value,
+--   paramPosterior :: [(arg, value)] -> InvFun () param
+-- }
+
 
 scoredHypothesis :: (RandomGen g, Eq a, Eq b) => InvFun () a
                  -> (a -> InvFun () b) -> (b -> InvFun () a) -> b 

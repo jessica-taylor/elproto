@@ -21,6 +21,15 @@ data InvFun a b where
   Flip :: Double -> InvFun () Bool
 
 
+{-
+-- Experimental:
+  Try :: InvFun a b -> InvFun b (Either (b, c) d) 
+      -> InvFun a (Either (a, c) d)
+  Importance :: [(Double, InvFun a b)] -> InvFun a b
+  Rejection :: (b -> Bool) -> InvFun a b -> InvFun a b
+-}
+
+
 sample :: (Eq a, Eq b, RandomGen g) => InvFun a b -> a -> Sampler g b
 sample (Pure f) x = case Pure.call f x of
   Left err -> fail err

@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Elb.Utils (
   pureI, composeI, subcallI, undoI, flipI,
-  appliedI, returnI, idI, replicateI, reverseI
+  appliedI, returnI, idI, replicateI, reverseI, incI
 ) where
 
 import Elb.InvFun
@@ -57,3 +57,5 @@ replicateI' n samp = $(distr [|\elems -> do
 replicateI :: Eq a => Int -> InvFun () a -> InvFun () [a]
 replicateI n samp = appliedI (replicateI' n samp) []
 
+incI :: (Eq a, Num a) => a -> InvFun a a
+incI inc = pureI $ errorless (+inc) (\x -> x - inc)
