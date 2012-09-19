@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 -- |'Examples' has examples for elproto.
-module Examples where
+module Elb.Examples where
 
 import Control.Monad (liftM, replicateM)
 
