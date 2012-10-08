@@ -2,12 +2,8 @@ Mario
 0. read solomonoff
 1. document all jacob's code, understand everything
 - things to know better: machine learning and (writing) models, haskell
-  (monads), template haskell
+  monads, template haskell
 2. reread large TODO example in annoying branch
 
 Jacob
 1. Implement Dirichlet, language models
-
-System
-Jacob writes shit tons of code, Mario documents so he understands until both
-are similarly productive (or Mario is at least really fucking productive).
